@@ -1,0 +1,18 @@
+<mvc:View controllerName="com.flexso.digital.ai.EmotionDetection.controller.Main" xmlns:mvc="sap.ui.core.mvc" displayBlock="true"
+	xmlns="sap.m" xmlns:core="sap.ui.core">
+	<Shell id="shell">
+		<App id="app">
+			<pages>
+				<Page id="page" title="{i18n>title}">
+					<content>
+						<Button press=".onStartVideo"></Button>
+						<Text id="status" text="Model Loading ..."></Text>
+						<core:HTML preferDOM="true" content="&lt;video id='video' width='400' height='250'/&gt;"/>
+						<core:HTML preferDOM="true" content="&lt;canvas id='canvas' width='400' height='250'/&gt;"/>
+						<core:HTML preferDOM="true" content=" &lt;div id='thank'&gt; &lt;center style='padding:10px; margin:5px'&gt;&lt;/center&gt; &lt;/div&gt;"/>
+					</content>
+				</Page>
+			</pages>
+		</App>
+	</Shell>
+</mvc:View>
