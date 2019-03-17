@@ -1,7 +1,6 @@
 sap.ui.define([
-	"sap/ui/core/mvc/Controller",
-	"EmotionDetection/libs/tensorflow"
-], function (Controller, tensorflow) {
+	"sap/ui/core/mvc/Controller"
+], function (Controller) {
 	"use strict";
 
 	return Controller.extend("com.flexso.digital.ai.EmotionDetection.controller.Main", {
@@ -22,10 +21,10 @@ sap.ui.define([
 				video: true
 			};
 			var $body = document.querySelector('body'); //    var status = document.getElementById('status');
-			var emotion_labels = [
+			this.emotion_labels = [
 				"angry", "disgust", "fear", "happy", "sad", "surprise", "neutral"
 			];
-			var emotion_colors = [
+			this.emotion_colors = [
 				"#ff0000", "#00a800", "#ff4fc1", "#ffe100", "#306eff", "#ff9d00", "#7c7c7c"
 			];
 			var offset_x = 15;
@@ -37,13 +36,13 @@ sap.ui.define([
 				});
 			}; // load models
 			var loadModel = function (path) {
-				var status = document.getElementById('status'); //        status.innerText = "Model Loading ..."
+				var status = this.byId("status");//document.getElementById('status'); //        status.innerText = "Model Loading ..."
 				createModel(path).then(function (result) {
 					this.predictionmodel = result;
 					status.innerText = "Model Loaded !!!"
-				});
-			};
-			loadModel('../models/mobilenetv1_models/model.json'); // create model
+				}.bind(this));
+			}.bind(this);
+			loadModel('model/mobilenetv1_models/model.json'); // create model
 		},
 
 		createVideoElement: function () {
@@ -84,6 +83,9 @@ sap.ui.define([
 			var isDetectingFaces = false
 			var faces = []
 			var hideTimeout;
+			var offset_x = 15;
+			var offset_y=40;
+			var me = this;
 			return function draw(canvas, video) {
 				window.requestAnimationFrame(function () {
 					return draw(canvas, video)
@@ -106,14 +108,14 @@ sap.ui.define([
 						var s_w = Math.floor(item.width + offset_x);
 						var s_h = Math.floor(item.height + offset_y);
 						var cT = ctx.getImageData(s_x, s_y, s_w, s_h);
-						cT = preprocess(cT);
-						z = this.predictionmodel.predict(cT)
+						cT = me.preprocess(cT);
+						var z = me.predictionmodel.predict(cT)
 						var index = z.argMax(1).dataSync()[0]
-						var label = emotion_labels[index];
-						ctx.strokeStyle = emotion_colors[index];
+						var label = me.emotion_labels[index];
+						ctx.strokeStyle = me.emotion_colors[index];
 						ctx.rect(s_x, s_y, s_w, s_h);
 						ctx.stroke();
-						ctx.fillStyle = emotion_colors[index];
+						ctx.fillStyle = me.emotion_colors[index];
 						ctx.fillText(label, s_x, s_y);
 						ctx.closePath();
 					}
@@ -128,11 +130,11 @@ sap.ui.define([
 				return faceDetector.detect(canvas).then(function (result) {
 					faces = result;
 					isDetectingFaces = false
-					var status = document.getElementById('status');
+					var status = me.byId("status");//document.getElementById('status');
 					status.innerHTML = "Running the model ... ";
-				});
+				}.bind(this));
 
-			}
+			}.bind(this)
 		},
 
 		preprocess: function (imgData) {
@@ -171,16 +173,16 @@ sap.ui.define([
 			draw(video_canvas, video)
 		},
 
-		startVideo: function () {
+		onStartVideo: function () {
 			var me = this;
 			var x = document.getElementById("thank");
 			x.style.display = "none";
-			var elem = document.getElementById('start');
-			elem.parentNode.removeChild(elem);
-			var status = document.getElementById('status');
+			// var elem = document.getElementById('start');
+			// elem.parentNode.removeChild(elem);
+			var status = this.byId("status");//document.getElementById('status');
 			status.innerHTML = "Initializing the camera ... ";
-			var ori = document.getElementById("original_video"); //        var emo = document.getElementById("emotion_video");
-			ori.innerHTML = "Original: " //        emo.innerHTML = "Result : "
+			// var ori = document.getElementById("original_video"); //        var emo = document.getElementById("emotion_video");
+			// ori.innerHTML = "Original: " //        emo.innerHTML = "Result : "
 			this.playCameraOnVideo(video).then(function () {
 				me.main(video)
 			}).catch(me.handleError)
